@@ -200,9 +200,9 @@ class BaseTrainer:
         else:
             return None
 
-    def _save_state_and_checkpoint(self):
+    def _save_state_and_checkpoint(self, save_model=False):
         if self.accelerator.is_main_process:
-            output_name = "checkpoint"
+            output_name = f"checkpoint_{self.overall_epoch}"
             save_path = Path(self.experiment_dir) / output_name
             if self.hparams["checkpoint_save_policy"] in ["steps", "step"]:
                 if self.overall_step % self.hparams["checkpoint_save_interval"] == 0:
@@ -210,7 +210,8 @@ class BaseTrainer:
             elif self.hparams["checkpoint_save_policy"] in ["epochs", "epoch"]:
                 if (
                     self.last_saved_checkpoint_epoch != self.overall_epoch
-                    and self.overall_epoch % self.hparams["checkpoint_save_interval"] == 0
+                    and self.overall_epoch % self.hparams["checkpoint_save_interval"] == 0 and
+                    save_model
                 ):
                     self.accelerator.save_state(save_path)
                     self.save_checkpoint(save_path)
@@ -351,7 +352,7 @@ class BaseTrainer:
                 )
                 pbar.set_description(f"Epoch {self.overall_epoch} (Done) ")
 
-            self._save_state_and_checkpoint()
+            self._save_state_and_checkpoint(save_model=True)
             self.overall_epoch = int(self.overall_epoch + 1)
             self.scheduler.step()
 
