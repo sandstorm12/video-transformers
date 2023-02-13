@@ -202,7 +202,7 @@ class BaseTrainer:
 
     def _save_state_and_checkpoint(self):
         if self.accelerator.is_main_process:
-            output_name = "checkpoint"
+            output_name = f"checkpoint_{self.overall_epoch}"
             save_path = Path(self.experiment_dir) / output_name
             if self.hparams["checkpoint_save_policy"] in ["steps", "step"]:
                 if self.overall_step % self.hparams["checkpoint_save_interval"] == 0:
